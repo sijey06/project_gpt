@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}
+  Генерация картинок
+{% endblock %}
+{% block content %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for template in templates %}
+        <div class="col">
+            <div class="card h-100 shadow-sm h-auto">
+                <img src="{{ template.image_url }}" class="card-img-top object-cover" style="aspect-ratio: 16/9;" alt="{{ template.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ template.title }}</h5>
+                    <p class="card-text">{{ template.name }}</p>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'select_template' template.id %}" class="btn btn-primary stretched-link">Выбрать</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col">
+            <div class="alert alert-info" role="alert">
+              Нет доступных шаблонов.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

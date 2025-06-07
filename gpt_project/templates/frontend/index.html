@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}
+  Генерация картинок
+{% endblock %}
+{% block content %}
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm p-4 rounded">
+                <div class="card-body text-center">
+                    <h1 class="display-6 fw-bold mb-4">Создай своё изображение!</h1>
+                    <p class="lead fs-5 mb-5">Опиши картинку словами или выбери готовый шаблон.</p>
+                
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'list_templates' %}" class="btn btn-primary btn-lg">Шаблоны</a>
+                        <a href="{% url 'generate_image' %}" class="btn btn-outline-success btn-lg">Создать изображение</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

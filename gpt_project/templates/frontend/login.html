@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}
+  Генерация картинок
+{% endblock %}
+{% block content %}
+    <h1>Авторизация</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="id_username">Имя пользователя:</label>
+        <input type="text" name="username" id="id_username"><br>
+        <label for="id_password">Пароль:</label>
+        <input type="password" name="password" id="id_password"><br>
+        <button type="submit">Войти</button>
+    </form>
+{% endblock %}

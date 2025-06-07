@@ -1,45 +1,147 @@
-from django.shortcuts import render
-from .forms import ImageGenerationForm
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_user_login
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect
+from django.conf import settings
 import requests
-import json
+
+from gpt_project.settings import AUTH_TOKEN
 
 
-def simple_generate_image_view(request):
-    form = ImageGenerationForm()
-    generated_image_url = None
-    templates = []  # Будем сохранять полученные шаблоны здесь
+def register(request):
+    """Обработчик регистрации пользователей."""
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            auth_user_login(request, user)
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'frontend/register.html', {'form': form})
 
-    # Отправляем GET-запрос для получения шаблонов
-    response_templates = requests.get('http://127.0.0.1:8000/api/template-list/')
 
-    if response_templates.status_code == 200:
-        templates = response_templates.json()  # Преобразование JSON в словарь
+def login_view(request):
+    """Авторизация пользователя."""
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth_user_login(request, user)
+            return redirect('home')
+        else:
+            return render(
+                request,
+                'frontend/login.html',
+                {'error': 'Неверные имя пользователя или пароль'}
+            )
+    return render(request, 'frontend/login.html')
+
+
+def logout_view(request):
+    """Разлогинивание пользователя."""
+    auth_logout(request)
+    return redirect('home')
+
+
+def home(request):
+    """Главная страница приложения."""
+    return render(request, 'frontend/index.html', {})
+
+
+def list_templates(request):
+    """Отображение списка шаблонов."""
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    headers = {"Authorization": AUTH_TOKEN}
+
+    response = requests.get(f"{settings.API_URL}/templates/", headers=headers)
+    templates = response.json() if response.ok else []
+    return render(
+        request,
+        'frontend/template-list.html',
+        {'templates': templates}
+    )
+
+
+def select_template(request, template_id):
+    """Выбор конкретного шаблона."""
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    headers = {"Authorization": AUTH_TOKEN}
+    response = requests.get(
+        f"{settings.API_URL}/templates/{template_id}",
+        headers=headers
+    )
+
+    if response.ok:
+        template = response.json()
+        return render(
+            request,
+            'frontend/detail-template.html',
+            {'template': template}
+        )
+    else:
+        return render(
+            request,
+            'frontend/error-page.html',
+            {'error': 'Ошибка загрузки шаблона.'}
+        )
+
+
+def generate_image(request):
+    """Генерация изображений."""
+    if not request.user.is_authenticated:
+        return redirect('login')
 
     if request.method == 'POST':
-        form = ImageGenerationForm(request.POST)
-        if form.is_valid():
-            cleaned_data = form.cleaned_data
+        custom_prompt = request.POST.get('custom_prompt', '').strip()
+        selected_template = request.POST.get('template_id', '')
 
-            payload = {
-                "prompt": cleaned_data.get('prompt'),
-                "app_id": "my-test-app",
-                "user_id": "my-test-user"
-            }
+        data = {
+            'app_id': 25,
+            'user_id': request.user.id,
+            'template_id': int(selected_template) if selected_template else None,
+        }
 
-            response = requests.post(
-                'http://127.0.0.1:8000/api/generate-image/',
-                headers={'Content-Type': 'application/json'},
-                data=json.dumps(payload)
+        if custom_prompt:
+            data['prompt'] = custom_prompt
+
+        files = {}
+        if 'template_file' in request.FILES:
+            files['template_file'] = request.FILES['template_file']
+
+        if files:
+            method = requests.post
+            kwargs = {'data': data, 'files': files}
+        else:
+            method = requests.post
+            kwargs = {'json': data}
+
+        headers = {"Authorization": AUTH_TOKEN}
+        api_response = method(
+            f"{settings.API_URL}/generate-image/",
+            headers=headers,
+            **kwargs
+        )
+
+        if api_response.ok:
+            result = api_response.json()
+            return render(
+                request,
+                'frontend/generate-image.html',
+                {'image_url': result['image_url'],
+                 'result': True}
+            )
+        else:
+            error_message = f"Ошибка ({api_response.status_code})."
+            return render(
+                request,
+                'frontend/generate-image.html',
+                {'error': error_message}
             )
 
-            if response.status_code == 200:
-                result = response.json()
-                generated_image_url = result.get('image_url')
-
-    context = {
-        'form': form,
-        'generated_image_url': generated_image_url,
-        'templates': templates  # Сюда передаем полученный список шаблонов
-    }
-
-    return render(request, 'simple_generate.html', context)
+    return render(request, 'frontend/generate-image.html', {})

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}
+  Генерация картинок
+{% endblock %}
+{% block content %}
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm p-4 rounded">
+                <div class="card-body text-center">
+                    <h1 class="display-6 fw-bold mb-4">Шаблон</h1>
+
+                    <img src="{{ template.image_url }}" class="img-fluid rounded mb-4" alt="{{ template.name }}">
+                    <h5 class="card-title">{{ template.title }}</h5>
+                    <p class="card-text lead">{{ template.description }}</p>
+
+                    <form method="post" enctype="multipart/form-data" action="{% url 'generate_image' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="template_id" value="{{ template.id }}">
+                        <div class="mb-3">
+                            <label for="custom_prompt" class="form-label">Ваш запрос (опционально):</label>
+                            <input type="text" name="custom_prompt" class="form-control" id="custom_prompt" placeholder="Опишите детальнее, что хотите видеть на изображении">
+                        </div>
+                        <div class="mb-3">
+                            <label for="template_file" class="form-label">Выберите изображение (опционально):</label>
+                            <input type="file" name="template_file" class="form-control-file" id="template_file">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Создать изображение</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
