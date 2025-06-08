@@ -11,7 +11,7 @@ def generate_image_from_prompt(prompt: str) -> str:
 
 def generate_image_with_template(
         prompt: str,
-        template_img_bytes: bytes
+        template_img_bytes: str
 ) -> str:
     """Сервисная функция для редактирования изображения по шаблону."""
     return image_generator.generate_image_with_template(
