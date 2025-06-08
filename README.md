@@ -76,15 +76,6 @@ python manage.py runserver
     "user_id": "string"
 }
 ```
-### Создать изображение по фото + текст:
-Тело запроса"
-```
-{
-    "template_file": "string",
-    "app_id": "string",
-    "user_id": "string"
-}
-```
 ### Создать изображение по фото + шаблон:
 Тело запроса"
 ```
