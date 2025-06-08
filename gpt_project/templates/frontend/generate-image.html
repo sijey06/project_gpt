@@ -19,7 +19,7 @@
                         </div>
                     {% endif %}
 
-                    <form method="post" class="mt-4">
+                    <form method="post" enctype="multipart/form-data" action="{% url 'generate_image' %}" class="mt-4">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="custom_prompt" class="form-label">Ваш собственный запрос:</label>
