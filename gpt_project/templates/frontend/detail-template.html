@@ -17,15 +17,13 @@
                         {% csrf_token %}
                         <input type="hidden" name="template_id" value="{{ template.id }}">
                         <div class="mb-3">
-                            <label for="custom_prompt" class="form-label">Ваш запрос (опционально):</label>
-                            <input type="text" name="custom_prompt" class="form-control" id="custom_prompt" placeholder="Опишите детальнее, что хотите видеть на изображении">
-                        </div>
-                        <div class="mb-3">
                             <label for="template_file" class="form-label">Выберите изображение (опционально):</label>
                             <input type="file" name="template_file" class="form-control-file" id="template_file">
                         </div>
                         <button type="submit" class="btn btn-primary btn-block">Создать изображение</button>
                     </form>
+                    <hr class="my-4">
+                    <a href="{% url 'home' %}" class="btn btn-link">Вернуться домой</a>
                 </div>
             </div>
         </div>
