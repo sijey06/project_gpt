@@ -4,16 +4,16 @@ from .utils import ImageGenerator
 image_generator = ImageGenerator()
 
 
-def generate_image_from_prompt(prompt: str) -> str:
+def generate_image_from_prompt(prompt):
     """Сервисная функция для генерации изображения по запросу."""
     return image_generator.generate_image_from_prompt(prompt)
 
 
 def generate_image_with_template(
-        prompt: str,
-        template_img_bytes: str
-) -> str:
+        prompt,
+        template_file_path
+):
     """Сервисная функция для редактирования изображения по шаблону."""
     return image_generator.generate_image_with_template(
-        prompt, template_img_bytes
+        prompt, template_file_path
     )

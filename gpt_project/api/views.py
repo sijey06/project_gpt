@@ -3,6 +3,9 @@ from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.core.files.storage import default_storage
+from tempfile import NamedTemporaryFile
 
 from .decorators import validate_app_id
 from .models import Application, PromptTemplate, Statistics
@@ -13,6 +16,7 @@ from .services import generate_image_from_prompt, generate_image_with_template
 class CreateImageViewSet(CreateModelMixin, GenericViewSet):
     """Представление для обработки POST-запросов на генерацию изображений."""
 
+    parser_classes = (MultiPartParser, FormParser,)
     serializer_class = ImageRequestSerializer
 
     @validate_app_id
@@ -38,21 +42,23 @@ class CreateImageViewSet(CreateModelMixin, GenericViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-        prompt = (
-            PromptTemplate.objects.filter(
-                id=validated_data.get('template_id')
-            ).first().description
-            if validated_data.get('template_id')
-            else validated_data.get('prompt')
-        )
+        prompt = None
+        if validated_data.get('template_id'):
+            prompt = PromptTemplate.objects.filter(id=validated_data.get('template_id')).first().description
+        elif validated_data.get('prompt'):
+            prompt = validated_data.get('prompt')
+        # Всегда вызываем одну из двух функций
+        if validated_data.get('template_file'):
+            uploaded_file = validated_data['template_file']
+            print(f"Received file {uploaded_file.name} of size {uploaded_file.size}")
+            print(f"MIME Type: {uploaded_file.content_type}")
 
-        image_url = (
-            generate_image_with_template(
-                prompt, validated_data['template_file'].read()
-            )
-            if validated_data.get('template_file')
-            else generate_image_from_prompt(prompt)
-        )
+            with uploaded_file.open(mode='rb') as file:
+                image_url = generate_image_with_template(prompt, file.read())
+            print('image')
+        else:
+            image_url = generate_image_from_prompt(prompt)
+            print('promt')
 
         return Response({'image_url': image_url}, status=status.HTTP_200_OK)
 
