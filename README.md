@@ -62,7 +62,7 @@ python manage.py runserver
 `GET /api/v1/templates/`
 ### Создать изображение по тексту:
 `POST /api/v1/generate-image/`
-Тело запроса"
+Тело запроса:
 ```
 {
     "prompt": "string",
@@ -72,7 +72,7 @@ python manage.py runserver
 ```
 ### Создать изображение по шаблону:
 `POST /api/v1/generate-image/`
-Тело запроса"
+Тело запроса:
 ```
 {
     "template_id": "integer",
@@ -82,7 +82,7 @@ python manage.py runserver
 ```
 ### Создать изображение по фото + шаблон:
 `POST /api/v1/generate-image/`
-Тело запроса"
+Тело запроса:
 ```
 {
     "template_file": "string",
