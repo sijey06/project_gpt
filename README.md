@@ -58,7 +58,10 @@ python manage.py runserver
     "password": "string"
 }
 ```
+### Получение списка всех шаблонов:
+`GET /api/v1/templates/`
 ### Создать изображение по тексту:
+`POST /api/v1/generate-image/`
 Тело запроса"
 ```
 {
@@ -68,6 +71,7 @@ python manage.py runserver
 }
 ```
 ### Создать изображение по шаблону:
+`POST /api/v1/generate-image/`
 Тело запроса"
 ```
 {
@@ -77,6 +81,7 @@ python manage.py runserver
 }
 ```
 ### Создать изображение по фото + шаблон:
+`POST /api/v1/generate-image/`
 Тело запроса"
 ```
 {
