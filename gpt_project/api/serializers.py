@@ -8,7 +8,7 @@ class ImageRequestSerializer(serializers.Serializer):
 
     prompt = serializers.CharField(required=False)
     template_id = serializers.IntegerField(required=False, allow_null=True)
-    template_file = serializers.FileField(required=False, allow_null=True)
+    template_file = serializers.ImageField(required=False, allow_null=True)
     app_id = serializers.CharField(required=True)
     user_id = serializers.CharField(required=True)
 

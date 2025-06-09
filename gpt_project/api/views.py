@@ -51,12 +51,11 @@ class CreateImageViewSet(CreateModelMixin, GenericViewSet):
             prompt = validated_data.get('prompt')
 
         if validated_data.get('template_file'):
-            print('sd')
-            uploaded_file = validated_data['template_file']
-            with uploaded_file.open(mode='rb') as file:
-                image_url = generate_image_with_template(prompt, file.read())
+            image_url = generate_image_with_template(
+                prompt,
+                validated_data['template_file'].read()
+            )
         else:
-            print('ss')
             image_url = generate_image_from_prompt(prompt)
 
         return Response({'image_url': image_url}, status=status.HTTP_200_OK)

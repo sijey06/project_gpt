@@ -2,8 +2,11 @@ import os
 
 import openai
 from dotenv import load_dotenv
+from io import BytesIO
+from PIL import Image
 
-from .constants import IMAGE_SIZE, IMAGE_COUNT
+
+from .constants import IMAGE_SIZE, IMAGE_COUNT, SIZE_LENGTH
 
 
 load_dotenv()
@@ -37,17 +40,24 @@ class ImageGenerator:
         except Exception as e:
             return f'Ошибка: {str(e)}'
 
-    def generate_image_with_template(self, prompt, template_file_path):
+    def generate_image_with_template(self, prompt, file_bytes):
         """Создание изображения на основе существующего шаблона."""
         try:
-            with open(template_file_path, "rb") as file:
-                response = self.client.images.edit(
-                    model="dall-e-2",
-                    image=file,
-                    prompt=prompt,
-                    n=IMAGE_COUNT,
-                    size=self.image_size
-                )
+            img = Image.open(BytesIO(file_bytes))
+            width, height = SIZE_LENGTH, SIZE_LENGTH
+            resized_img = img.resize((width, height))
+
+            byte_stream = BytesIO()
+            resized_img.save(byte_stream, format='PNG')
+            byte_array = byte_stream.getvalue()
+
+            response = self.client.images.edit(
+                image=byte_array,
+                prompt=prompt,
+                n=IMAGE_COUNT,
+                model="dall-e-2",
+                size=IMAGE_SIZE
+            )
             return self.handle_response(response)
         except Exception as e:
             return f'Ошибка: {str(e)}'
