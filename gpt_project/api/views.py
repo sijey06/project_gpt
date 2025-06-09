@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from .decorators import validate_app_id
 from .models import Application, PromptTemplate, Statistics
@@ -14,11 +14,12 @@ from .services import generate_image_from_prompt, generate_image_with_template
 class CreateImageViewSet(CreateModelMixin, GenericViewSet):
     """Представление для обработки POST-запросов на генерацию изображений."""
 
-    parser_classes = (MultiPartParser, FormParser,)
+    parser_classes = (MultiPartParser, FormParser, JSONParser,)
     serializer_class = ImageRequestSerializer
 
     @validate_app_id
     def create(self, request, *args, **kwargs):
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
@@ -50,10 +51,12 @@ class CreateImageViewSet(CreateModelMixin, GenericViewSet):
             prompt = validated_data.get('prompt')
 
         if validated_data.get('template_file'):
+            print('sd')
             uploaded_file = validated_data['template_file']
             with uploaded_file.open(mode='rb') as file:
                 image_url = generate_image_with_template(prompt, file.read())
         else:
+            print('ss')
             image_url = generate_image_from_prompt(prompt)
 
         return Response({'image_url': image_url}, status=status.HTTP_200_OK)

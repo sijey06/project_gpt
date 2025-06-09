@@ -110,26 +110,23 @@ def generate_image(request):
         if custom_prompt:
             data['prompt'] = custom_prompt
 
-        files = {}
-        if 'template_file' in request.FILES:
-            files['template_file'] = request.FILES['template_file']
-
-        if files:
-            method = requests.post
-            kwargs = {'data': data, 'files': files}
-        else:
-            method = requests.post
-            kwargs = {'json': data}
-
-        headers = {"Authorization": AUTH_TOKEN}
-        api_response = method(
-            f"{settings.API_URL}/generate-image/",
-            headers=headers,
-            **kwargs
+        response = (
+            requests.post(
+                settings.API_URL + "/generate-image/",
+                headers={"Authorization": AUTH_TOKEN},
+                data=data,
+                files=request.FILES
+            )
+            if 'template_file' in request.FILES
+            else requests.post(
+                settings.API_URL + "/generate-image/",
+                json=data,
+                headers={"Authorization": AUTH_TOKEN}
+            )
         )
 
-        if api_response.ok:
-            result = api_response.json()
+        if response.ok:
+            result = response.json()
             return render(
                 request,
                 'frontend/generate-image.html',
@@ -137,7 +134,7 @@ def generate_image(request):
                  'result': True}
             )
         else:
-            error_message = f"Ошибка ({api_response.status_code})."
+            error_message = f'Ошибка ({response.status_code})'
             return render(
                 request,
                 'frontend/generate-image.html',
